@@ -1,6 +1,7 @@
+#include <nvs_flash.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
-#include <nvs_flash.h>
+#include <esp_http_server.h>
 #include "macros.h"
 
 
@@ -62,6 +63,16 @@ static esp_err_t wifi_ap() {
   printf("- Start WiFi\n");
   ERET( esp_wifi_start() );
   return ESP_OK;
+}
+
+
+static esp_err_t httpd_static(httpd_req_t *req) {
+  
+}
+
+
+static esp_err_t httpd_init() {
+
 }
 
 
