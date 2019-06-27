@@ -48,13 +48,18 @@ static char* http_content_type(char *path) {
 }
 
 
-static esp_err_t httpd_static(httpd_req_t *req) {
+static esp_err_t on_static_file(httpd_req_t *req) {
   char buff[1024];
   size_t size;
+  printf("- On Static File (event)\n");
   printf("Request URI = %s\n", req->uri);
   if(strcmp(req->uri, "/") == 0) strcpy((char*)req->uri, "/index.html");
   sprintf(buff, "/spiffs%s", req->uri);
-  httpd_resp_set_type(req, http_content_type(buff));
+  printf("File path = %s\n", buff);
+  char *type = http_content_type(buff);
+  printf("Content type = %s\n", type);
+  httpd_resp_set_type(req, type);
+  printf("- Reading file %s\n", buff);
   FILE *f = fopen(buff, "r");
   if (f == NULL) {
     printf("Cannot open file %s\n", buff);
@@ -64,6 +69,7 @@ static esp_err_t httpd_static(httpd_req_t *req) {
     size = fread(buff, 1, sizeof(buff), f);
     ERET( httpd_resp_send_chunk(req, buff, size) );
   } while (size == sizeof(buff));
+  printf("- End HTTP response\n");
   httpd_resp_sendstr_chunk(req, NULL);
   fclose(f);
   return ESP_OK;
@@ -74,14 +80,16 @@ static esp_err_t httpd_init() {
   httpd_handle_t handle = NULL;
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
   config.uri_match_fn = httpd_uri_match_wildcard;
+  printf("- Start HTTP server\n");
   ERET( httpd_start(&handle, &config) );
-  httpd_uri_t static_file = {
+  httpd_uri_t reg_static_file = {
     .uri = "/*",
     .method = HTTP_GET,
-    .handler = httpd_static,
+    .handler = on_static_file,
     .user_ctx = NULL,
   };
-  httpd_register_uri_handler(handle, &static_file);
+  printf("- Register static file handler\n");
+  httpd_register_uri_handler(handle, &reg_static_file);
   return ESP_OK;
 }
 
