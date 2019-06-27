@@ -67,12 +67,12 @@ static esp_err_t wifi_ap() {
 
 
 static esp_err_t httpd_static(httpd_req_t *req) {
-  
+  return ESP_OK;
 }
 
 
 static esp_err_t httpd_init() {
-
+  return ESP_OK;
 }
 
 
